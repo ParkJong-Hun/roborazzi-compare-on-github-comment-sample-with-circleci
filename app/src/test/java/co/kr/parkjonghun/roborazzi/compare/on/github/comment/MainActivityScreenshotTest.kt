@@ -1,12 +1,23 @@
 package co.kr.parkjonghun.roborazzi.compare.on.github.comment
 
-import org.junit.Assert.assertEquals
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.takahirom.roborazzi.captureRoboImage
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.GraphicsMode
 
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class MainActivityScreenshotTest {
+    @get:Rule
+    val composeRule = createAndroidComposeRule<MainActivity>()
+
     @Test
     fun launch() {
-        // TODO
-        assertEquals(4, 2 + 2)
+        composeRule.onNode(hasTestTag("greeting"))
+            .captureRoboImage()
     }
 }
