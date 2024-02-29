@@ -21,7 +21,6 @@ commands:
       - run:
           name: <<parameters.title>>
           command: |
-            cd mobile
             ./gradlew <<parameters.task>> --no-daemon
 
 jobs:
