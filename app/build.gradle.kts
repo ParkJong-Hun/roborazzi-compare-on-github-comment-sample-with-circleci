@@ -1,7 +1,7 @@
-@Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.roborazzi.plugin)
 }
 
 android {
@@ -48,10 +48,16 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    // ↓ is needed to use Robolectric.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
-
+    // Android Studio Template Default Deps.
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
@@ -67,4 +73,12 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+
+    // ↓ is needed to test screenshots on the Roborazzi with robolectric.
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.espresso.core)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.ui.test.junit4)
 }
