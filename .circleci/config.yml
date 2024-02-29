@@ -1,0 +1,43 @@
+version: 2.1
+
+orbs:
+  android: circleci/android@2.3.0
+
+machines:
+  android: &android
+    executor:
+      name: android/android-docker
+      resource-class: large
+      tag: 2023.11.1
+
+commands:
+  gradle:
+    parameters:
+      title:
+        type: string
+      task:
+        type: string
+    steps:
+      - run:
+          name: <<parameters.title>>
+          command: |
+            cd mobile
+            ./gradlew <<parameters.task>> --no-daemon
+
+jobs:
+  unit_test:
+    <<: *android
+    steps:
+      - checkout
+      - gradle:
+          title: Unit Test
+          task: testDebugUnitTest
+
+workflows:
+  ci:
+    jobs:
+      - unit_test:
+          filters:
+            branches:
+              only:
+                - /master\/.*/
