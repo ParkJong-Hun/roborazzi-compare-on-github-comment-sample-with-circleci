@@ -35,9 +35,14 @@ jobs:
 workflows:
   ci:
     jobs:
+      # TODO: when pull request is opened, create comparison branch and record screenshots
+      # TODO: checkout to target branch and import screenshots from comparison branch
+      # FIXME: record, compare screenshots
       - unit_test:
           filters:
             branches:
               only:
                 - main
                 - /feature\/.*/
+      # TODO: clear old comment and write new comment on PR with compare results
+      # TODO: when pull request is merged or closed, delete comparison branch
