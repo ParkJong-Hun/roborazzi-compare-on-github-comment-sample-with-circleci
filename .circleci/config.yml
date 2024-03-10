@@ -55,7 +55,7 @@ workflows:
                 - main
                 - /feature\/.*/
       - compare:
-          required:
+          requires:
             - record
           filters:
             branches:
