@@ -24,21 +24,39 @@ commands:
             ./gradlew <<parameters.task>> --no-daemon
 
 jobs:
-  unit_test:
+  record:
     <<: *android
     steps:
+      # TODO: check mode;
+      # TODO: check if comparison branch exists, if not, create it.
+      # FIXME: checkout to comparison branch.
       - checkout
       - gradle:
-          title: Unit Test
-          task: testDebugUnitTest
+          title: Record screenshots
+          task: ./gradlew recordRoborazziDebug
+  compare:
+    <<: *android
+    steps:
+      # FIXME: checkout to target branch
+      - checkout
+      # TODO: import screenshots from comparison branch
+      - gradle:
+          title: Compare screenshots
+          task: ./gradlew compareRoborazziDebug
 
 workflows:
   ci:
     jobs:
-      # TODO: when pull request is opened, create comparison branch and record screenshots
-      # TODO: checkout to target branch and import screenshots from comparison branch
-      # FIXME: record, compare screenshots
-      - unit_test:
+      # TODO: when pull request is opened
+      - record:
+          filters:
+            branches:
+              only:
+                - main
+                - /feature\/.*/
+      - compare:
+          required:
+            - record
           filters:
             branches:
               only:
