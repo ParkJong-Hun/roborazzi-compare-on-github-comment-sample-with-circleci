@@ -33,7 +33,7 @@ jobs:
       - checkout
       - gradle:
           title: Record screenshots
-          task: ./gradlew recordRoborazziDebug
+          task: recordRoborazziDebug
   compare:
     <<: *android
     steps:
@@ -42,7 +42,7 @@ jobs:
       # TODO: import screenshots from comparison branch
       - gradle:
           title: Compare screenshots
-          task: ./gradlew compareRoborazziDebug
+          task: compareRoborazziDebug
 
 workflows:
   ci:
