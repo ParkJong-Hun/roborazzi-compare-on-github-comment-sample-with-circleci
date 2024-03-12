@@ -22,6 +22,19 @@ commands:
           name: <<parameters.title>>
           command: |
             ./gradlew <<parameters.task>> --no-daemon
+  checkout-comparison-branch:
+    parameters:
+      branch:
+        type: string
+        default: '$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//") | jq ".base.ref" | tr -d "\042" )'
+    steps:
+      - run:
+          name: Checkout to comparison branch
+          command: |
+            git fetch origin <<parameters.branch>>
+            PARENT_BRANCH=$(git log --oneline origin/<<parameters.branch>>)
+            git merge-base origin/<<parameters.branch>> $PARENT_BRANCH
+            git checkout -b <<parameters.branch>> origin/<<parameters.branch>>-comparison
 
 jobs:
   record:
