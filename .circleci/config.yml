@@ -41,16 +41,14 @@ jobs:
     <<: *android
     steps:
       # TODO: check mode;
-      # TODO: check if comparison branch exists, if not, create it.
-      # FIXME: checkout to comparison branch.
-      - checkout
+      - checkout-comparison-branch
       - gradle:
           title: Record screenshots
           task: recordRoborazziDebug
+      # TODO: push comparison branch
   compare:
     <<: *android
     steps:
-      # FIXME: checkout to target branch
       - checkout
       # TODO: import screenshots from comparison branch
       - gradle:
