@@ -29,6 +29,7 @@ commands:
         default: '$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//") | jq ".base.ref" | tr -d "\042" )'
     steps:
       - run:
+          # FIXME: make it work ;;
           name: Switch to comparison branch
           command: |
             git fetch origin <<parameters.branch>>
