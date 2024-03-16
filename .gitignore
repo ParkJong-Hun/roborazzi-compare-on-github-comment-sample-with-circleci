@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# ↓ is needed for Comparsion
+!**/build/**/roborazzi/
+
 # Local configuration file (sdk path, etc)
 local.properties
 
