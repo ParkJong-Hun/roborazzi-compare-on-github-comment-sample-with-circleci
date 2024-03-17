@@ -32,10 +32,14 @@ commands:
           # FIXME: make it work ;;
           name: Switch to comparison branch
           command: |
+            git branch
             git fetch origin <<parameters.branch>>
+            git branch
             PARENT_BRANCH=$(git log --oneline origin/<<parameters.branch>>)
             git merge-base origin/<<parameters.branch>> $PARENT_BRANCH
+            git branch
             git checkout -b <<parameters.branch>>-comparison
+            git branch
 
 jobs:
   record:
