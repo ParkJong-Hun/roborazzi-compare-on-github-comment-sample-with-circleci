@@ -31,7 +31,7 @@ commands:
             git fetch origin $CIRCLE_BRANCH
             PARENT_BRANCH=$(git log --oneline origin/$CIRCLE_BRANCH)
             git checkout $PARENT_BRANCH
-            git checkout -b $CIRCLE_BRANCH-comparison
+            git checkout -b comparison-$CIRCLE_BRANCH
             git branch
 
 jobs:
