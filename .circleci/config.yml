@@ -29,7 +29,7 @@ commands:
           name: Switch to comparison branch
           command: |
             git fetch origin $CIRCLE_BRANCH
-            PARENT_BRANCH=$(git log --oneline origin/$CIRCLE_BRANCH)
+            PARENT_BRANCH=$(git show-branch --merge-base HEAD $(git for-each-ref --format='%(refname:short)' refs/heads/*))
             echo "Parent branch: $PARENT_BRANCH"
             git reset --hard $PARENT_BRANCH
             git branch
