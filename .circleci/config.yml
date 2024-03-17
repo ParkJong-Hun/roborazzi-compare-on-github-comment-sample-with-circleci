@@ -32,7 +32,6 @@ commands:
           # FIXME: make it work ;;
           name: Switch to comparison branch
           command: |
-            git remote add origin $CIRCLE_REPOSITORY_URL
             git fetch origin <<parameters.branch>>
             PARENT_BRANCH=$(git log --oneline origin/<<parameters.branch>>)
             git merge-base origin/<<parameters.branch>> $PARENT_BRANCH
