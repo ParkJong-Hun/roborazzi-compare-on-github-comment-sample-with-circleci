@@ -37,18 +37,24 @@ commands:
             echo "Creating comparison branch: $COMPARISON_BRANCH"
             git checkout -b $COMPARISON_BRANCH
             echo "Switched to comparison branch: comparison-$CIRCLE_BRANCH"
+  push-comparison-branch:
+    steps:
+      - run:
+          name: Push comparison branch
+          command: |
+            git push origin $COMPARISON_BRANCH
 
 jobs:
   record:
     <<: *android
     steps:
-      # TODO: check mode;
+      # TODO: check mode
       - checkout
       - switch-comparison-branch
       - gradle:
           title: Record screenshots
           task: recordRoborazziDebug
-      # TODO: push comparison branch
+      - push-comparison-branch
   compare:
     <<: *android
     steps:
