@@ -28,14 +28,11 @@ commands:
           # FIXME: make it work ;;
           name: Switch to comparison branch
           command: |
-            git branch -a
-            echo $CIRCLE_BRANCH
             git fetch origin $CIRCLE_BRANCH
-            git branch
             PARENT_BRANCH=$(git log --oneline origin/$CIRCLE_BRANCH)
-            git merge-base origin/$CIRCLE_BRANCH $PARENT_BRANCH
+            git checkout $PARENT_BRANCH
             git branch
-            git checkout -b $CIRCLE_BRANCH-comparison
+            git switch -c $CIRCLE_BRANCH-comparison
             git branch
 
 jobs:
