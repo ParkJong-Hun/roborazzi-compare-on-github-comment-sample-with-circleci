@@ -29,13 +29,10 @@ commands:
           name: Switch to comparison branch
           command: |
             git fetch origin $CIRCLE_BRANCH
-            PARENT_BRANCH=$(git show-branch --merge-base HEAD $(git for-each-ref --format='%(refname:short)' refs/heads/*))
-            echo "Parent branch: $PARENT_BRANCH"
-            git reset --hard $PARENT_BRANCH
-            git branch
-            COMPARISON_BRANCH=comparison-$CIRCLE_BRANCH
-            echo "Creating comparison branch: $COMPARISON_BRANCH"
-            git checkout -b $COMPARISON_BRANCH
+            BASE_COMMIT=$(git show-branch --merge-base HEAD $(git for-each-ref --format='%(refname:short)' refs/heads/*))
+            echo "Base commit hash: $BASE_COMMIT"
+            git reset --hard $BASE_COMMIT
+            git checkout -b comparison-$CIRCLE_BRANCH
             echo "Switched to comparison branch: comparison-$CIRCLE_BRANCH"
   push-comparison-branch:
     steps:
