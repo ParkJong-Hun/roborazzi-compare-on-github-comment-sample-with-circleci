@@ -30,6 +30,7 @@ commands:
           command: |
             git fetch origin $CIRCLE_BRANCH
             PARENT_BRANCH=$(git log --oneline origin/$CIRCLE_BRANCH)
+            echo "Parent branch: $PARENT_BRANCH"
             git reset --hard $PARENT_BRANCH
             git branch
             COMPARISON_BRANCH=comparison-$CIRCLE_BRANCH
