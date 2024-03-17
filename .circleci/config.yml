@@ -33,6 +33,7 @@ commands:
           name: Switch to comparison branch
           command: |
             git branch -a
+            echo <<parameters.branch>>
             git fetch origin/<<parameters.branch>>
             git branch
             PARENT_BRANCH=$(git log --oneline origin/<<parameters.branch>>)
