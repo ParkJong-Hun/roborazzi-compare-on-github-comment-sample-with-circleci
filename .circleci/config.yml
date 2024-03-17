@@ -35,7 +35,7 @@ commands:
             git fetch origin <<parameters.branch>>
             PARENT_BRANCH=$(git log --oneline origin/<<parameters.branch>>)
             git merge-base origin/<<parameters.branch>> $PARENT_BRANCH
-            git checkout -b <<parameters.branch>> origin/<<parameters.branch>>-comparison
+            git checkout -b <<parameters.branch>>-comparison
 
 jobs:
   record:
