@@ -29,7 +29,8 @@ commands:
           name: Switch to comparison branch
           command: |
             git fetch origin $CIRCLE_BRANCH
-            BASE_COMMIT=$(git show-branch --merge-base HEAD $(git for-each-ref --format='%(refname:short)' refs/heads/*))
+            PARENT_BRANCH=$(git show-branch | grep '*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//')
+            BASE_COMMIT=$(git merge-base $PARENT_BRANCH $CIRCLE_BRANCH)
             echo "Base commit hash: $BASE_COMMIT"
             git reset --hard $BASE_COMMIT
             git checkout -b comparison-$CIRCLE_BRANCH
@@ -40,7 +41,7 @@ commands:
           name: Push comparison branch
           command: |
             git push origin $COMPARISON_BRANCH
-
+# sdadfadsfsdfdf
 jobs:
   record:
     <<: *android
