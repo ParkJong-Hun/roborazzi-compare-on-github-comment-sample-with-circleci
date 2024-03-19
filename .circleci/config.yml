@@ -42,7 +42,6 @@ commands:
           name: Push comparison branch
           command: |
             git push origin $COMPARISON_BRANCH
-# sdadfadsfsdfdf
 jobs:
   record:
     <<: *android
