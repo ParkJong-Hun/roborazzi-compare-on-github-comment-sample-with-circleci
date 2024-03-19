@@ -29,6 +29,7 @@ commands:
           name: Switch to comparison branch
           command: |
             git fetch origin $CIRCLE_BRANCH
+            echo "Debug1"
             PARENT_BRANCH=$(git show-branch | grep '*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//')
             echo "Parent branch: $PARENT_BRANCH"
             BASE_COMMIT=$(git merge-base $PARENT_BRANCH $CIRCLE_BRANCH)
