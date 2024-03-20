@@ -36,12 +36,6 @@ commands:
             git reset --hard $BASE_COMMIT
             git checkout -b comparison-$CIRCLE_BRANCH
             echo "Switched to comparison branch: comparison-$CIRCLE_BRANCH"
-  push-comparison-branch:
-    steps:
-      - run:
-          name: Push comparison branch
-          command: |
-            git push origin $COMPARISON_BRANCH
   find_and_store_artifacts:
     parameters:
       path:
@@ -55,21 +49,24 @@ commands:
       - store_artifacts:
           path: merged/<<parameters.path>>
 jobs:
-  record:
+  import_artifacts:
     <<: *android
     steps:
       # TODO: check mode
       - checkout
+      # TODO: check artifacts
+      # TODO: if artifacts exist, import them and finish the job
+      # TODO: else,
       - switch-comparison-branch
       - gradle:
-          title: Record screenshots
+          title: Record target branch screenshots
           task: recordRoborazziDebug
-      - push-comparison-branch
-  compare:
+      # TODO: export artifacts
+      # TODO: checkout to the original branch
+      # TODO: import artifacts
+  unit_test:
     <<: *android
     steps:
-      - checkout
-      # TODO: import screenshots from comparison branch
       - gradle:
           title: Compare screenshots
           task: compareRoborazziDebug
@@ -86,28 +83,27 @@ jobs:
 workflows:
   ci:
     jobs:
-      # TODO: when pull request is opened
-      - record:
+      - import_artifacts:
           filters:
             branches:
               only:
                 - main
                 - /feature\/.*/
-      - compare:
+      - unit_test:
           requires:
-            - record
+            - import_artifacts
           filters:
             branches:
               only:
                 - main
                 - /feature\/.*/
-        # TODO: clear old comment and write new comment on PR with compare results
       - export_artifacts:
           requires:
-            - compare
+            - unit_test
           filters:
             branches:
               only:
                 - main
                 - /feature\/.*/
+        # TODO: clear old comment and write new comment on PR
         # TODO: when comparison branch's base branch(parent of the pull request) is merged or closed, delete comparison branch
