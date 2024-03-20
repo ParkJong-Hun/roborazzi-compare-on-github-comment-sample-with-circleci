@@ -42,6 +42,18 @@ commands:
           name: Push comparison branch
           command: |
             git push origin $COMPARISON_BRANCH
+  find_and_store_artifacts:
+    parameters:
+      path:
+        type: string
+    steps:
+      - run:
+          name: Find and merge roborazzi folders
+          command: |
+            mkdir -p merged/<<parameters.path>>
+            find . -type d -path "./<<parameters.path>>/*" -exec cp -r {} merged/<<parameters.path>> \;
+      - store_artifacts:
+          path: merged/<<parameters.path>>
 jobs:
   record:
     <<: *android
@@ -61,6 +73,15 @@ jobs:
       - gradle:
           title: Compare screenshots
           task: compareRoborazziDebug
+  export_artifacts:
+    <<: *android
+    steps:
+      - find_and_store_artifacts:
+          path: app/build/outputs/roborazzi
+      - find_and_store_artifacts:
+          path: app/build/reports
+      - find_and_store_artifacts:
+          path: app/build/test-results
 
 workflows:
   ci:
@@ -80,5 +101,13 @@ workflows:
               only:
                 - main
                 - /feature\/.*/
-      # TODO: clear old comment and write new comment on PR with compare results
-      # TODO: when comparison branch's base branch(parent of the pull request) is merged or closed, delete comparison branch
+        # TODO: clear old comment and write new comment on PR with compare results
+      - export_artifacts:
+          requires:
+            - compare
+          filters:
+            branches:
+              only:
+                - main
+                - /feature\/.*/
+        # TODO: when comparison branch's base branch(parent of the pull request) is merged or closed, delete comparison branch
