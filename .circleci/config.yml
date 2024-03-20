@@ -44,10 +44,10 @@ commands:
       - run:
           name: Find and merge roborazzi folders
           command: |
-            mkdir -p merged/<<parameters.path>>
-            find . -type d -path "./<<parameters.path>>/*" -exec cp -r {} merged/<<parameters.path>> \;
+            mkdir -p $CIRCLE_BRANCH/merged/<<parameters.path>>
+            find . -type d -path "./<<parameters.path>>/*" -exec cp -r {} $CIRCLE_BRANCH/merged/<<parameters.path>> \;
       - store_artifacts:
-          path: merged/<<parameters.path>>
+          path: $CIRCLE_BRANCH/merged/<<parameters.path>>
 jobs:
   import_artifacts:
     <<: *android
