@@ -18,6 +18,9 @@ commands:
         type: string
       task:
         type: string
+      # write whatever you want
+      options:
+        type: string
     steps:
       - run:
           name: <<parameters.title>>
@@ -35,6 +38,20 @@ commands:
             fi
             echo "Is this build Pull Request: $is_pr"
             echo "export IS_PR=$is_pr" >> $BASH_ENV
+
+  determine_compare_screenshots:
+    steps:
+      - run:
+          name: Determine compare screenshots
+          command: |
+            if [ $IS_PR = "true" ]; then
+              echo "This is a Pull Request build"
+              extra_unit_test_options="-Proborazzi.test.compare=true"
+            else
+              echo "This is not a Pull Request build"
+            fi
+            echo "
+            echo "export EXTRA_UNIT_TEST_OPTIONS=extra_unit_test_options" >> $BASH_ENV
 
   switch_comparison_branch:
     steps:
@@ -144,8 +161,9 @@ jobs:
       # TODO: check mode
       # TODO: import_artifacts
       - gradle:
-          title: Compare screenshots
-          task: compareRoborazziDebug
+          title: Unit test
+          task: testDebugUnitTest
+          options: $EXTRA_UNIT_TEST_OPTIONS
       - set_git_config
       # TODO: export artifacts
   #      - comment_screenshots_diff
