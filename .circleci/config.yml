@@ -23,6 +23,7 @@ commands:
           name: <<parameters.title>>
           command: |
             ./gradlew <<parameters.task>> --no-daemon
+
   switch-comparison-branch:
     steps:
       - run:
@@ -37,6 +38,7 @@ commands:
             git reset --hard $BASE_COMMIT
             git checkout -b comparison-$CIRCLE_BRANCH
             echo "Switched to comparison branch: comparison-$CIRCLE_BRANCH"
+
   find_and_store_artifacts:
     parameters:
       path:
@@ -49,6 +51,7 @@ commands:
             find . -type d -path "./<<parameters.path>>/*" -exec cp -r {} $CIRCLE_BRANCH/merged/<<parameters.path>> \;
       - store_artifacts:
           path: $CIRCLE_BRANCH/merged/<<parameters.path>>
+
 jobs:
   import_artifacts:
     <<: *android
