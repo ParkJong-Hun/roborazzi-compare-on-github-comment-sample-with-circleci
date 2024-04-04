@@ -68,12 +68,14 @@ jobs:
       # TODO: export artifacts
       # TODO: checkout to the original branch
       # TODO: import artifacts
+
   unit_test:
     <<: *android
     steps:
       - gradle:
           title: Compare screenshots
           task: compareRoborazziDebug
+
   export_artifacts:
     <<: *android
     steps:
