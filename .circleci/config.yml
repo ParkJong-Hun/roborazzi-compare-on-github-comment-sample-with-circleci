@@ -120,7 +120,7 @@ commands:
               unzip ./temp/zip/artifact.zip || true
               rm -rf ./temp || true
             fi
-            echo "app/build/outputs: $(ls ./app/build/outputs/roborazzi)"
+            echo "app/build/outputs/roborazzi: $(ls ./app/build/outputs/roborazzi)"
 
   # TODO: Do not ignore commit history of existing artifact branch.
   # but, if it occurs conflict, completely ignore the contents of the previous commit and replace it with the new commit.
