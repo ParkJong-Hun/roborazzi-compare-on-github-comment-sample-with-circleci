@@ -223,6 +223,25 @@ commands:
             git clean -df
             git push origin HEAD:artifact_$CIRCLE_BRANCH -f
 
+  cleanup_branches:
+    parameters:
+      prefix:
+        type: string
+      maximum_seconds_past:
+        type: integer
+        default: 1209600 # 14 days (industry standard agile sprint)
+    steps:
+      - run:
+          name: Cleanup branches
+          command: |
+            git branch -r --format="%(refname:lstrip=3)" | grep << parameters.prefix >> | while read -r branch; do
+              last_commit_date_timestamp=$(git log -1 --format=%ct "origin/$branch")
+              now_timestamp=$(date +%s)
+              if [ $((now_timestamp - last_commit_date_timestamp)) -gt << parameters.maximum_seconds_past >> ]; then
+                git push origin --delete "$branch"
+              fi
+            done || true
+
 jobs:
   # for getting the base branch name
   sleep:
@@ -250,6 +269,10 @@ jobs:
       - push_artifact_as_branch
       - push_comparison_branch
       - comment_screenshots_diff
+      - cleanup_branches:
+          prefix: artifact_
+      - cleanup_branches:
+          prefix: comparison_
 
 workflows:
   ci:
