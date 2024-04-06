@@ -120,58 +120,6 @@ commands:
               rm -rf ./temp || true
             fi
 
-  set_git_config:
-    steps:
-      - run:
-          name: Set git config
-          # Set github account for comment as environment variables.
-          command: |
-            git config --global user.name "$GITHUB_BOT_NAME"
-            git config --global user.email "$GITHUB_BOT_EMAIL"
-
-  comment_screenshots_diff:
-    steps:
-      - gh/install
-      - run:
-          name: Sign in Github
-          command: echo "$GITHUB_BOT_ACCESS_TOKEN" | gh auth login --with-token
-      - run:
-          name: Create comment
-          command: |
-            files=$(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png")
-            if [ -n "$files" ]; then
-              echo "### Snapshot diff report" > comment
-              echo "| File name | Image |" >> comment
-              echo "|-------|-------|" >> comment
-              for file in $files; do
-                fileName=$(basename "$file" | sed -r 's/(.{20})/\1<br>/g')
-                echo "| [$fileName](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file) | ![](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file?raw=true) |" >> comment
-              done
-            else
-              echo "### Snapshot diff report" > comment
-              echo "There is no screenshot change exist in this pull request !" >> comment
-            fi
-      - run:
-          name: Comment screenshots diff
-          command: |
-            if [ $IS_PR = "true" ]; then
-              prNumber=$(echo $CIRCLE_PULL_REQUEST | sed "s:.*/::")
-              url="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/${prNumber}/comments"
-              commentIds=$(echo -n $(curl -s -H "Authorization: token $GITHUB_BOT_ACCESS_TOKEN" $url -v | jq '.[] | select(.body | test("^### Snapshot diff report.*")) | .id'))
-              failedComment="$(echo -e "### Snapshot diff report\n:warning: **Failed to show Snapshot diff**\n$CIRCLE_BUILD_URL")"
-            
-              if [ -n "$commentIds" ]; then
-                for commentId in $commentIds; do
-                  comment="$(cat ./comment)"
-                  endpoint="/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/comments/$commentId"
-                  gh api --method DELETE -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint ||
-                  gh api --method PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint -f body="$failedComment"
-                done
-              fi
-            
-              gh pr comment "$CIRCLE_PULL_REQUEST" -F ./comment || gh pr comment "$CIRCLE_PULL_REQUEST" -b "$failedComment"
-            fi
-
   # TODO: Do not ignore commit history of existing artifact branch.
   # but, if it occurs conflict, completely ignore the contents of the previous commit and replace it with the new commit.
   push_artifact_as_branch:
@@ -226,6 +174,58 @@ commands:
                 git clean -df
                 git push origin HEAD:comparison_$CIRCLE_BRANCH -f
               fi
+            fi
+
+  set_git_config:
+    steps:
+      - run:
+          name: Set git config
+          # Set github account for comment as environment variables.
+          command: |
+            git config --global user.name "$GITHUB_BOT_NAME"
+            git config --global user.email "$GITHUB_BOT_EMAIL"
+
+  comment_screenshots_diff:
+    steps:
+      - gh/install
+      - run:
+          name: Sign in Github
+          command: echo "$GITHUB_BOT_ACCESS_TOKEN" | gh auth login --with-token
+      - run:
+          name: Create comment
+          command: |
+            files=$(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png")
+            if [ -n "$files" ]; then
+              echo "### Snapshot diff report" > comment
+              echo "| File name | Image |" >> comment
+              echo "|-------|-------|" >> comment
+              for file in $files; do
+                fileName=$(basename "$file" | sed -r 's/(.{20})/\1<br>/g')
+                echo "| [$fileName](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file) | ![](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file?raw=true) |" >> comment
+              done
+            else
+              echo "### Snapshot diff report" > comment
+              echo "There is no screenshot change exist in this pull request !" >> comment
+            fi
+      - run:
+          name: Comment screenshots diff
+          command: |
+            if [ $IS_PR = "true" ]; then
+              prNumber=$(echo $CIRCLE_PULL_REQUEST | sed "s:.*/::")
+              url="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/${prNumber}/comments"
+              commentIds=$(echo -n $(curl -s -H "Authorization: token $GITHUB_BOT_ACCESS_TOKEN" $url -v | jq '.[] | select(.body | test("^### Snapshot diff report.*")) | .id'))
+              failedComment="$(echo -e "### Snapshot diff report\n:warning: **Failed to show Snapshot diff**\n$CIRCLE_BUILD_URL")"
+            
+              if [ -n "$commentIds" ]; then
+                for commentId in $commentIds; do
+                  comment="$(cat ./comment)"
+                  endpoint="/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/comments/$commentId"
+                  gh api --method DELETE -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint ||
+                  gh api --method PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint -f body="$failedComment"
+                done
+              fi
+            
+              gh pr comment "$CIRCLE_PULL_REQUEST" -F ./comment || gh pr comment "$CIRCLE_PULL_REQUEST" -b "$failedComment"
             fi
 
   cleanup_branches:
