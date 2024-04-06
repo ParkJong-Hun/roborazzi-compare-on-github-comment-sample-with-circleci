@@ -240,7 +240,6 @@ jobs:
           title: Unit test
           task: testDebugUnitTest
           options: $EXTRA_UNIT_TEST_OPTIONS
-      - set_git_config
       - push_comparison_branch
       - comment_screenshots_diff
 
