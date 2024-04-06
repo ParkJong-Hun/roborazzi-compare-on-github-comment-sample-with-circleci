@@ -285,10 +285,10 @@ jobs:
 workflows:
   ci:
     jobs:
-      #      - sleep
+      - sleep
       - unit_test:
-          #          requires:
-          #            - sleep
+          requires:
+            - sleep
           filters:
             branches:
               only:
