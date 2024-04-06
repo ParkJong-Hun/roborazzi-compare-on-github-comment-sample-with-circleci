@@ -274,7 +274,6 @@ workflows:
           filters:
             branches:
               only:
-                - main
                 - /release\/.*/
                 - /feat\/.*/
                 - /feature\/.*/
