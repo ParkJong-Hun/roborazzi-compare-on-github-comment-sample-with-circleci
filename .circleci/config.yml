@@ -49,7 +49,7 @@ commands:
           command: |
             if [ $IS_PR = "true" ]; then
               echo "This is a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.record=true -Proborazzi.test.compare=true"
+              extra_unit_test_options="-Proborazzi.test.record=true" + " " + "-Proborazzi.test.compare=true"
             else
               echo "This is not a Pull Request build"
               extra_unit_test_options="-Proborazzi.test.record=true"
@@ -120,6 +120,7 @@ commands:
               unzip ./temp/zip/artifact.zip || true
               rm -rf ./temp || true
             fi
+            echo "app/build/outputs/roborazzi: $(ls ./app/build/outputs/roborazzi)"
 
   # TODO: Do not ignore commit history of existing artifact branch.
   # but, if it occurs conflict, completely ignore the contents of the previous commit and replace it with the new commit.
@@ -284,10 +285,10 @@ jobs:
 workflows:
   ci:
     jobs:
-      - sleep
+      #      - sleep
       - unit_test:
-          requires:
-            - sleep
+          #          requires:
+          #            - sleep
           filters:
             branches:
               only:
