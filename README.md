@@ -7,6 +7,9 @@ When any pull request is created or updated, This will pushes historical test ou
 ### Requirement
 1. Register a Deploy key with read/**write** access to GitHub and register the corresponding private key in CircleCI.
 2. Prepare **Github bot account** for commenting or pushing branches, and add the account information to circle ci project's environment variables.
+  - `GITHUB_BOT_NAME`
+  - `GITHUB_BOT_EMAIL`
+  - `GITHUB_BOT_ACCESS_TOKEN`
 
 ## Artifact as CircleCI Artifact Mode
 When any pull request is created or updated, This will store historical test output and comparison output as a artifact to circle ci.
