@@ -50,7 +50,6 @@ commands:
             else
               echo "This is not a Pull Request build"
             fi
-            echo "
             echo "export EXTRA_UNIT_TEST_OPTIONS=extra_unit_test_options" >> $BASH_ENV
 
   import_artifact:
