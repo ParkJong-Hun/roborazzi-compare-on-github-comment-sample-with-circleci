@@ -116,6 +116,35 @@ commands:
               rm -rf ./temp || true
             fi
 
+  push_comparison_branch:
+    steps:
+      - set_git_config
+      - run:
+          name: Push compare branch
+          command: |
+            if [ $IS_PR = "true" ]; then
+              git push origin --delete comparison_$CIRCLE_BRANCH || true
+            
+              fileSize=$(echo $(find -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png" | wc -l | sed -e 's/ //g'))
+              echo "Detected Comparison outputs size: $fileSize"
+              if [ $fileSize -ne 0 ]; then
+                git checkout --orphan comparison_$CIRCLE_BRANCH
+                git rm --cached -rf .
+            
+                add_files=$(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png")
+                for file in $add_files; do
+                  git add -f $file
+                done
+            
+                echo -e "version: 2.1\njobs:\n no-op:\n  machine: true\n  steps:\n  - run: no-op\nworkflows:\n build:\n  jobs:\n   - no-op:\n      filters:\n       branches:\n        only: no-op" > .circleci/config.yml
+                git add .circleci/config.yml
+            
+                git commit -m "Screenshot difference between ${CIRCLE_BRANCH}(head) and ${BASE_BRANCH_NAME}(base)"
+                git clean -df
+                git push origin HEAD:comparison_$CIRCLE_BRANCH -f
+              fi
+            fi
+
   set_git_config:
     steps:
       - run:
@@ -212,8 +241,8 @@ jobs:
           task: testDebugUnitTest
           options: $EXTRA_UNIT_TEST_OPTIONS
       - set_git_config
+      - push_comparison_branch
       - comment_screenshots_diff
-      # TODO: export comparison result
 
   export_artifact:
     <<: *android
