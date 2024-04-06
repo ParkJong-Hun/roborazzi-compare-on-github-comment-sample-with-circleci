@@ -46,9 +46,10 @@ commands:
           command: |
             if [ $IS_PR = "true" ]; then
               echo "This is a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.compare=true"
+              extra_unit_test_options="-Proborazzi.test.compare=true -Proborazzi.test.record=true"
             else
               echo "This is not a Pull Request build"
+              extra_unit_test_options="-Proborazzi.test.record=true"
             fi
             echo "export EXTRA_UNIT_TEST_OPTIONS=${extra_unit_test_options}" >> $BASH_ENV
 
@@ -245,19 +246,9 @@ jobs:
           title: Unit test
           task: testDebugUnitTest
           options: $EXTRA_UNIT_TEST_OPTIONS
+      - push_artifact_as_branch
       - push_comparison_branch
       - comment_screenshots_diff
-
-  export_artifact:
-    <<: *android
-    steps:
-      - checkout
-      # TODO: check mode
-      - gradle:
-          title: Record screenshots
-          task: testDebugUnitTest
-          options: -Proborazzi.test.record=true
-      - push_artifact_as_branch
 
 workflows:
   ci:
