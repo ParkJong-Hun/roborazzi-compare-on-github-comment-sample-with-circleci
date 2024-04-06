@@ -137,22 +137,6 @@ jobs:
             echo "Sleeping for 1 minute, create pr if you want"
             sleep 60s
 
-  #  import_artifacts:
-  #    <<: *android
-  #    steps:
-  #      # TODO: check mode
-  #      - checkout
-  #      # TODO: check artifacts
-  #      # TODO: if artifacts exist, import them and finish the job
-  #      # TODO: else,
-  #      - switch_comparison_branch
-  #      - gradle:
-  #          title: Record target branch screenshots
-  #          task: recordRoborazziDebug
-  #      # TODO: export artifacts
-  #      # TODO: checkout to the original branch
-  #      # TODO: import artifacts
-
   unit_test:
     <<: *android
     steps:
@@ -166,17 +150,7 @@ jobs:
           options: $EXTRA_UNIT_TEST_OPTIONS
       - set_git_config
       # TODO: export artifacts
-  #      - comment_screenshots_diff
-
-  #  export_artifacts:
-  #    <<: *android
-  #    steps:
-  #      - find_and_store_artifacts:
-  #          path: app/build/outputs/roborazzi
-  #      - find_and_store_artifacts:
-  #          path: app/build/reports
-  #      - find_and_store_artifacts:
-  #          path: app/build/test-results
+      - comment_screenshots_diff
 
 workflows:
   ci:
@@ -203,5 +177,4 @@ workflows:
               only:
                 - main
                 - /feature\/.*/
-        # TODO: clear old comment and write new comment on PR
         # TODO: when comparison branch's base branch(parent of the pull request) is merged or closed, delete comparison branch
