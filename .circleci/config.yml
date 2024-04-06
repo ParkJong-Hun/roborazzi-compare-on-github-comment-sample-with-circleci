@@ -170,7 +170,7 @@ commands:
             files=$(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png")
             for file in $files; do
               fileName=$(basename "$file" | sed -r 's/(.{20})/\1<br>/g')
-              echo "| [$fileName](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/compare_$CIRCLE_BRANCH/$file) | ![](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/compare_$CIRCLE_BRANCH/$file?raw=true) |" >> comment
+              echo "| [$fileName](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file) | ![](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file?raw=true) |" >> comment
             done
       - run:
           name: Comment screenshots diff
