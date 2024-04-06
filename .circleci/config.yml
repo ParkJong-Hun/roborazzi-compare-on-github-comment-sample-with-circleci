@@ -265,7 +265,6 @@ workflows:
           filters:
             branches:
               only:
-                - main
                 - /release\/.*/
                 - /feat\/.*/
                 - /feature\/.*/
@@ -275,6 +274,7 @@ workflows:
           filters:
             branches:
               only:
+                - main
                 - /release\/.*/
                 - /feat\/.*/
                 - /feature\/.*/
