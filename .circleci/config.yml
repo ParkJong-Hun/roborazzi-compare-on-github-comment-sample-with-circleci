@@ -29,12 +29,11 @@ commands:
 
   check_is_pr:
     steps:
-      - gh/install
       - run:
           name: Check if it is a PR
           command: |
             is_pr=false
-            if [ -z "$CIRCLE_PULL_REQUEST" ]; then
+            if [ -n "$CIRCLE_PULL_REQUEST" ]; then
               is_pr=true
             fi
             echo "Is this build Pull Request: $is_pr"
@@ -158,6 +157,10 @@ commands:
 
   comment_screenshots_diff:
     steps:
+      - gh/install
+      - run:
+          name: Sign in Github
+          command: echo "$GITHUB_BOT_ACCESS_TOKEN" | gh auth login --with-token
       - run:
           name: Create comment
           command: |
