@@ -260,15 +260,6 @@ workflows:
           filters:
             branches:
               only:
-                - /release\/.*/
-                - /feat\/.*/
-                - /feature\/.*/
-                - /fix\/.*/
-                - /bugfix\/.*/
-      - export_artifact:
-          filters:
-            branches:
-              only:
                 - main
                 - /release\/.*/
                 - /feat\/.*/
