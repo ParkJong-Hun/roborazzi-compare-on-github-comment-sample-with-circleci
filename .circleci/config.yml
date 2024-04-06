@@ -165,7 +165,7 @@ commands:
           name: Create comment
           command: |
             files=$(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png")
-            if [ -z "$files" ]; then
+            if [ -n "$files" ]; then
               echo "Snapshot diff report" > comment
               echo "| File name | Image |" >> comment
               echo "|-------|-------|" >> comment
@@ -264,6 +264,7 @@ workflows:
             branches:
               only:
                 - main
+                - develop
                 - /release\/.*/
                 - /feat\/.*/
                 - /feature\/.*/
