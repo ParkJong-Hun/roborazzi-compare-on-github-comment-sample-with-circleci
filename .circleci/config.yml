@@ -25,7 +25,7 @@ commands:
       - run:
           name: <<parameters.title>>
           command: |
-            ./gradlew <<parameters.task>> --no-daemon
+            ./gradlew <<parameters.task>> <<parameters.option>> --no-daemon
 
   check_is_pr:
     steps:
