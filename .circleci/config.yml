@@ -134,6 +134,9 @@ commands:
             git checkout --orphan artifact_$CIRCLE_BRANCH
             git rm --cached -rf .
             
+            fileSize=$(echo $(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png" | wc -l | sed -e 's/ //g'))
+            echo "Detected Comparison outputs size: $fileSize"
+            
             add_files=$(find . -type f -path "*/build/outputs/roborazzi/*")
             for file in $add_files; do
               git add -f $file
