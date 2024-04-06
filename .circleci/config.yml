@@ -22,13 +22,17 @@ commands:
       options:
         default: --no-daemon
         type: string
-      vrt-options:
+      # DO NOT TOUCH THIS
+      default-vrt-option:
+        default: -Proborazzi.test.compare=true
+        type: string
+      vrt-option:
         type: string
     steps:
       - run:
           name: <<parameters.title>>
           command: |
-            ./gradlew <<parameters.task>> <<parameters.options>> <<parameters.vrt-options>>
+            ./gradlew <<parameters.task>> <<parameters.options>> <<parameters.default-vrt-option>> <<parameters.vrt-option>>
 
   check_is_pr:
     steps:
@@ -49,10 +53,10 @@ commands:
           command: |
             if [ $IS_PR = "true" ]; then
               echo "This is a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.record=true" + " " + "-Proborazzi.test.compare=true"
+              extra_unit_test_options="-Proborazzi.test.compare=true"
             else
               echo "This is not a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.record=true"
+              extra_unit_test_options=""
             fi
             echo "options: $extra_unit_test_options"
             echo "export EXTRA_UNIT_TEST_OPTIONS=${extra_unit_test_options}" >> $BASH_ENV
@@ -273,7 +277,7 @@ jobs:
       - gradle:
           title: Unit test
           task: testDebugUnitTest
-          vrt-options: $EXTRA_UNIT_TEST_OPTIONS
+          vrt-option: $EXTRA_UNIT_TEST_OPTIONS
       - push_artifact_as_branch
       - push_comparison_as_branch
       - comment_screenshots_diff
