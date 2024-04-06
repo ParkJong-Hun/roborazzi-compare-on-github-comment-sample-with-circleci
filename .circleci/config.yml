@@ -271,7 +271,7 @@ jobs:
           title: Unit test
           task: testDebugUnitTest
           vrt-options: $EXTRA_UNIT_TEST_OPTIONS
-      #      - push_artifact_as_branch
+      - push_artifact_as_branch
       - push_comparison_as_branch
       - comment_screenshots_diff
       - cleanup_branches:
