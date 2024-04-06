@@ -303,3 +303,5 @@ workflows:
                 - /feature\/.*/
                 - /fix\/.*/
                 - /bugfix\/.*/
+                - /hotfix\/.*/
+                - /refactor\/.*/
