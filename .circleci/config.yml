@@ -60,7 +60,7 @@ commands:
           command: |
             pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
             echo "Pull Request: $pr"
-            base_branch_name=$(curl -s -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" $pr | jq '.base.ref')
+            base_branch_name=$(curl -s -H "Authorization: token ${GITHUB_BOT_ACCESS_TOKEN}" $pr | jq '.base.ref')
             echo "Base branch: $base_branch_name"
             echo "export BASE_BRANCH_NAME=${base_branch_name}" >> $BASH_ENV
       - run:
@@ -174,7 +174,7 @@ commands:
             if [ $IS_PR = "true" ]; then
               prNumber=$(echo $CIRCLE_PULL_REQUEST | sed "s:.*/::")
               url="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/${prNumber}/comments"
-              commentIds=$(echo -n $(curl -s -H "Authorization: token $GITHUB_ACCESS_TOKEN" $url -v | jq '.[] | select(.body | test("^Snapshot diff report.*")) | .id'))
+              commentIds=$(echo -n $(curl -s -H "Authorization: token $GITHUB_BOT_ACCESS_TOKEN" $url -v | jq '.[] | select(.body | test("^Snapshot diff report.*")) | .id'))
             
               if [ -n "$commentIds" ]; then
                 for commentId in $commentIds; do
