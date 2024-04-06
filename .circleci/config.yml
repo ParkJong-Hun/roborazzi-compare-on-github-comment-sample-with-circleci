@@ -49,11 +49,12 @@ commands:
           command: |
             if [ $IS_PR = "true" ]; then
               echo "This is a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.record=true -Proborazzi.test.compare=true"
+              extra_unit_test_options="-Proborazzi.test.record=true" + " " + "-Proborazzi.test.compare=true"
             else
               echo "This is not a Pull Request build"
               extra_unit_test_options="-Proborazzi.test.record=true"
             fi
+            echo "options: $extra_unit_test_options"
             echo "export EXTRA_UNIT_TEST_OPTIONS=${extra_unit_test_options}" >> $BASH_ENV
 
   import_artifact:
@@ -119,6 +120,7 @@ commands:
               unzip ./temp/zip/artifact.zip || true
               rm -rf ./temp || true
             fi
+            echo "app/build/outputs/roborazzi: $(ls ./app/build/outputs/roborazzi)"
 
   # TODO: Do not ignore commit history of existing artifact branch.
   # but, if it occurs conflict, completely ignore the contents of the previous commit and replace it with the new commit.
@@ -154,6 +156,7 @@ commands:
           name: Push compare branch
           command: |
             if [ $IS_PR = "true" ]; then
+              echo "Current branch: $(git branch --show-current)"
               git push origin --delete comparison_$CIRCLE_BRANCH || true
             
               fileSize=$(echo $(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png" | wc -l | sed -e 's/ //g'))
@@ -290,6 +293,7 @@ workflows:
             branches:
               only:
                 - main
+                - develop
                 - /release\/.*/
                 - /feat\/.*/
                 - /feature\/.*/
