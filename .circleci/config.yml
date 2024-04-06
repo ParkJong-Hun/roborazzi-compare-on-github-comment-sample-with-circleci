@@ -20,7 +20,7 @@ commands:
         type: string
       # write whatever you want
       options:
-        default: --no-daemon
+        default: --no-daemon -Proborazzi.test.record=true
         type: string
       vrt-options:
         type: string
@@ -49,10 +49,10 @@ commands:
           command: |
             if [ $IS_PR = "true" ]; then
               echo "This is a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.record=true -Proborazzi.test.compare=true"
+              extra_unit_test_options="-Proborazzi.test.compare=true"
             else
               echo "This is not a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.record=true"
+              extra_unit_test_options=""
             fi
             echo "options: $extra_unit_test_options"
             echo "export EXTRA_UNIT_TEST_OPTIONS=${extra_unit_test_options}" >> $BASH_ENV
@@ -288,10 +288,10 @@ jobs:
 workflows:
   ci:
     jobs:
-#      - sleep
+      #      - sleep
       - unit_test:
-#          requires:
-#            - sleep
+          #          requires:
+          #            - sleep
           filters:
             branches:
               only:
