@@ -49,7 +49,7 @@ commands:
           command: |
             if [ $IS_PR = "true" ]; then
               echo "This is a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.compare=true -Proborazzi.test.record=true"
+              extra_unit_test_options="-Proborazzi.test.record=true -Proborazzi.test.compare=true"
             else
               echo "This is not a Pull Request build"
               extra_unit_test_options="-Proborazzi.test.record=true"
