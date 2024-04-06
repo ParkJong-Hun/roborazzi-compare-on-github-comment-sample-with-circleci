@@ -29,6 +29,7 @@ commands:
 
   check_is_pr:
     steps:
+      - gh/install
       - run:
           name: Check if it is a PR
           command: |
