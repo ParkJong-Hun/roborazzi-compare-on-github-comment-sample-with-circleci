@@ -185,13 +185,14 @@ commands:
                 for commentId in $commentIds; do
                   comment="$(cat ./comment)"
                   endpoint="/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/comments/$commentId"
-                  gh api --method PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint -f body="$comment" ||
+                  gh pr delete-comment $endpoint || 
                   gh api --method PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint -f body="$failedComment"
                 done
               else
                 failedComment="$(echo -e "Snapshot diff report\n:warning: **Failed to show Snapshot diff**\n$CIRCLE_BUILD_URL")"
-                gh pr comment "$CIRCLE_PULL_REQUEST" -F ./comment || gh pr comment "$CIRCLE_PULL_REQUEST" -b "$failedComment"
               fi
+            
+              gh pr comment "$CIRCLE_PULL_REQUEST" -F ./comment || gh pr comment "$CIRCLE_PULL_REQUEST" -b "$failedComment"
             fi
 
   # TODO: Do not ignore commit history of existing artifact branch.
