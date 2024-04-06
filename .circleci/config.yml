@@ -166,8 +166,6 @@ commands:
           command: |
             files=$(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png")
             if [ -z "$files" ]; then
-              failedComment="$(echo -e "Snapshot diff report\n:warning: **Failed to show Snapshot diff**\n$CIRCLE_BUILD_URL")"
-              echo "$failedComment" > comment
               echo "Snapshot diff report" > comment
               echo "| File name | Image |" >> comment
               echo "|-------|-------|" >> comment
