@@ -251,7 +251,8 @@ jobs:
       # TODO: check mode
       - gradle:
           title: Record screenshots
-          task: recordRoborazziDebug
+          task: testDebugUnitTest
+          options: -Proborazzi.test.record=true
       - push_artifact_as_branch
 
 workflows:
