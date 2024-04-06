@@ -54,6 +54,7 @@ commands:
               echo "This is not a Pull Request build"
               extra_unit_test_options="-Proborazzi.test.record=true"
             fi
+            echo "options: $extra_unit_test_options"
             echo "export EXTRA_UNIT_TEST_OPTIONS=${extra_unit_test_options}" >> $BASH_ENV
 
   import_artifact:
@@ -154,6 +155,7 @@ commands:
           name: Push compare branch
           command: |
             if [ $IS_PR = "true" ]; then
+              echo "Current branch: $(git branch --show-current)"
               git push origin --delete comparison_$CIRCLE_BRANCH || true
             
               fileSize=$(echo $(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png" | wc -l | sed -e 's/ //g'))
