@@ -126,7 +126,7 @@ commands:
             if [ $IS_PR = "true" ]; then
               git push origin --delete comparison_$CIRCLE_BRANCH || true
             
-              fileSize=$(echo $(find -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png" | wc -l | sed -e 's/ //g'))
+              fileSize=$(echo $(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png" | wc -l | sed -e 's/ //g'))
               echo "Detected Comparison outputs size: $fileSize"
               if [ $fileSize -ne 0 ]; then
                 git checkout --orphan comparison_$CIRCLE_BRANCH
