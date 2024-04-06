@@ -239,6 +239,7 @@ jobs:
     steps:
       - checkout
       - check_is_pr
+      - determine_compare_screenshots
       # TODO: check mode (artifact as branch, artifact as circle ci's artifact)
       - import_artifact
       - gradle:
