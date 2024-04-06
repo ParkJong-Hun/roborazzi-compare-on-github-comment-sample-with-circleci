@@ -269,4 +269,3 @@ workflows:
                 - /feature\/.*/
                 - /fix\/.*/
                 - /bugfix\/.*/
-        # TODO: when comparison branch's base branch(parent of the pull request) is merged or closed, delete comparison branch
