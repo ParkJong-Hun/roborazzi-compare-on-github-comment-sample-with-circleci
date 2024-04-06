@@ -20,12 +20,15 @@ commands:
         type: string
       # write whatever you want
       options:
+        default: --no-daemon
+        type: string
+      vrt-options:
         type: string
     steps:
       - run:
           name: <<parameters.title>>
           command: |
-            ./gradlew <<parameters.task>> <<parameters.options>> --no-daemon
+            ./gradlew <<parameters.task>> <<parameters.options>> <<parameters.vrt-options>>
 
   check_is_pr:
     steps:
@@ -268,7 +271,7 @@ jobs:
       - gradle:
           title: Unit test
           task: testDebugUnitTest
-          options: $EXTRA_UNIT_TEST_OPTIONS
+          vrt-options: $EXTRA_UNIT_TEST_OPTIONS
       - push_artifact_as_branch
       - push_comparison_branch
       - comment_screenshots_diff
