@@ -53,33 +53,75 @@ commands:
             echo "
             echo "export EXTRA_UNIT_TEST_OPTIONS=extra_unit_test_options" >> $BASH_ENV
 
-  switch_comparison_branch:
+  import_artifact:
     steps:
       - run:
-          # FIXME: make it work ;;
-          name: Switch to comparison branch
+          name: Save Base branch name to env
           command: |
-            git fetch origin $CIRCLE_BRANCH
-            PARENT_BRANCH=$(git show-branch | grep '*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//')
-            echo "Parent branch: $PARENT_BRANCH"
-            BASE_COMMIT=$(git merge-base $PARENT_BRANCH $CIRCLE_BRANCH)
-            echo "Base commit hash: $BASE_COMMIT"
-            git reset --hard $BASE_COMMIT
-            git checkout -b comparison-$CIRCLE_BRANCH
-            echo "Switched to comparison branch: comparison-$CIRCLE_BRANCH"
+            pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
+            echo "Pull Request: $pr"
+            base_branch_name=$(curl -s -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" $pr | jq '.base.ref')
+            echo "Base branch: $base_branch_name"
+            echo "export BASE_BRANCH_NAME=${base_branch_name}" >> $BASH_ENV
+      - run:
+          name: Save Artifact existing state to env
+          command: |
+            is_artifact_exist=false
+            if [ $IS_PR = "true" ]; then
+              is_artifact_exist=$(echo -n "$(git fetch origin artifact_$BASE_BRANCH_NAME && echo true || echo false)")
+            fi
+            echo "Are artifact exist: are_screenshots_exist"
+            echo "export ARE_artifact_EXIST=${are_artifact_exist}" >> $BASH_ENV
+      - run:
+          name: Checkout artifact branch
+          command: |
+            if [ $IS_ARTIFACT_EXIST = "true" ]; then
+              git fetch origin artifact_$BASE_BRANCH_NAME
+              git checkout artifact_$BASE_BRANCH_NAME
+            fi
+      - run:
+          name: Save artifact's timestamp to env
+          command: |
+            if [ $IS_ARTIFACT_EXIST = "false" ]; then
+              echo "no-op" > timestamp
+            fi
+            echo "Artifact Timestamp: $(cat timestamp)"
+            echo "export ARTIFACT_TIMESTAMP=$(echo -n $(cat timestamp))" >> $BASH_ENV
+      - run:
+          name: Zip artifact
+          command: |
+            if [ $IS_ARTIFACT_EXIST = "true" ]; then
+              mkdir -p ./temp/zip
+              touch artifact.zip
+              find . -type f -path "*/build/outputs/roborazzi/*" zip -r ./temp/zip/artifact.zip {} +
+              echo "Zipped artifact: $(ls ./temp/zip)"
+            fi
+      - save_cache:
+          paths:
+            - ./temp/zip
+          key: artifact-{{ checksum "timestamp" }}
+      - run:
+          name: Checkout Head branch
+          command: git checkout $CIRCLE_BRANCH
+      - run:
+          name: Restore Artifact timestamp file
+          command: echo $ARTIFACT_TIMESTAMP > timestamp
+      - restore_cache:
+          key: artifact-{{ checksum "timestamp" }}
+      - run:
+          name: Unzip artifact
+          command: |
+            if [ $IS_ARTIFACT_EXIST = "true" ]; then
+              unzip ./temp/zip/artifact.zip || true
+              rm -rf ./temp || true
+            fi
 
-  find_and_store_artifacts:
-    parameters:
-      path:
-        type: string
+  # TODO: export artifact as branch or circle ci's artifact
+  export_artifact:
     steps:
       - run:
-          name: Find and merge roborazzi folders
-          command: |
-            mkdir -p $CIRCLE_BRANCH/merged/<<parameters.path>>
-            find . -type d -path "./<<parameters.path>>/*" -exec cp -r {} $CIRCLE_BRANCH/merged/<<parameters.path>> \;
-      - store_artifacts:
-          path: $CIRCLE_BRANCH/merged/<<parameters.path>>
+          name: no-op
+          command: echo "TODO"
 
   set_git_config:
     steps:
@@ -142,39 +184,40 @@ jobs:
     steps:
       - checkout
       - check_is_pr
-      # TODO: check mode
-      # TODO: import_artifacts
+      # TODO: check mode (artifact as branch, artifact as circle ci's artifact)
+      - import_artifact
       - gradle:
           title: Unit test
           task: testDebugUnitTest
           options: $EXTRA_UNIT_TEST_OPTIONS
       - set_git_config
-      # TODO: export artifacts
       - comment_screenshots_diff
+      # TODO: export comparison result
 
 workflows:
   ci:
     jobs:
-      - import_artifacts:
-          filters:
-            branches:
-              only:
-                - main
-                - /feature\/.*/
+      - sleep
       - unit_test:
           requires:
-            - import_artifacts
+            - sleep
           filters:
             branches:
               only:
                 - main
+                - /release\/.*/
+                - /feat\/.*/
                 - /feature\/.*/
-      - export_artifacts:
-          requires:
-            - unit_test
+                - /fix\/.*/
+                - /bugfix\/.*/
+      - export_artifact:
           filters:
             branches:
               only:
                 - main
+                - /release\/.*/
+                - /feat\/.*/
                 - /feature\/.*/
+                - /fix\/.*/
+                - /bugfix\/.*/
         # TODO: when comparison branch's base branch(parent of the pull request) is merged or closed, delete comparison branch
