@@ -71,8 +71,8 @@ commands:
             if [ $IS_PR = "true" ]; then
               is_artifact_exist=$(echo -n "$(git fetch origin artifact_$BASE_BRANCH_NAME && echo true || echo false)")
             fi
-            echo "Are artifact exist: are_screenshots_exist"
-            echo "export ARE_artifact_EXIST=${are_artifact_exist}" >> $BASH_ENV
+            echo "Is artifact exist: is_screenshots_exist"
+            echo "export IS_ARTIFACT_EXIST=${is_artifact_exist}" >> $BASH_ENV
       - run:
           name: Checkout artifact branch
           command: |
