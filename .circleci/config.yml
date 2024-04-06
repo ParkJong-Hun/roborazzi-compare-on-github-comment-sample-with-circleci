@@ -264,7 +264,6 @@ workflows:
             branches:
               only:
                 - main
-                - develop
                 - /release\/.*/
                 - /feat\/.*/
                 - /feature\/.*/
