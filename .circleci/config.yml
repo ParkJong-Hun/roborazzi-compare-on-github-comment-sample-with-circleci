@@ -20,7 +20,7 @@ commands:
         type: string
       # write whatever you want
       options:
-        default: --no-daemon -Proborazzi.test.record=true
+        default: --no-daemon
         type: string
       vrt-options:
         type: string
@@ -49,10 +49,10 @@ commands:
           command: |
             if [ $IS_PR = "true" ]; then
               echo "This is a Pull Request build"
-              extra_unit_test_options="-Proborazzi.test.compare=true"
+              extra_unit_test_options="-Proborazzi.test.record=true" + " " + "-Proborazzi.test.compare=true"
             else
               echo "This is not a Pull Request build"
-              extra_unit_test_options=""
+              extra_unit_test_options="-Proborazzi.test.record=true"
             fi
             echo "options: $extra_unit_test_options"
             echo "export EXTRA_UNIT_TEST_OPTIONS=${extra_unit_test_options}" >> $BASH_ENV
@@ -134,9 +134,6 @@ commands:
             
             git checkout --orphan artifact_$CIRCLE_BRANCH
             git rm --cached -rf .
-            
-            fileSize=$(echo $(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png" | wc -l | sed -e 's/ //g'))
-            echo "Detected Comparison outputs size: $fileSize"
             
             add_files=$(find . -type f -path "*/build/outputs/roborazzi/*")
             for file in $add_files; do
@@ -288,10 +285,10 @@ jobs:
 workflows:
   ci:
     jobs:
-      #      - sleep
+      - sleep
       - unit_test:
-          #          requires:
-          #            - sleep
+          requires:
+            - sleep
           filters:
             branches:
               only:
