@@ -116,13 +116,6 @@ commands:
               rm -rf ./temp || true
             fi
 
-  # TODO: export artifact as branch or circle ci's artifact
-  export_artifact:
-    steps:
-      - run:
-          name: no-op
-          command: echo "TODO"
-
   set_git_config:
     steps:
       - run:
@@ -167,6 +160,34 @@ commands:
               fi
             fi
 
+  # TODO: Do not ignore commit history of existing artifact branch.
+  # but, if it occurs conflict, completely ignore the contents of the previous commit and replace it with the new commit.
+  push_artifact_as_branch:
+    steps:
+      - set_git_config
+      - run:
+          name: Export recorded screenshots
+          command: |
+            git push origin --delete artifact_$CIRCLE_BRANCH || true
+            
+            git checkout --orphan artifact_$CIRCLE_BRANCH
+            git rm --cached -rf .
+            
+            add_files=$(find . -type f -path "*/build/outputs/roborazzi/*")
+            for file in $add_files; do
+              git add -f $file
+            done
+            
+            echo $(date +%s) > timestamp
+            git add -f timestamp
+            
+            echo -e "version: 2.1\njobs:\n no-op:\n  machine: true\n  steps:\n  - run: no-op\nworkflows:\n build:\n  jobs:\n   - no-op:\n      filters:\n       branches:\n        only: no-op" > .circleci/config.yml
+            git add -f .circleci/config.yml
+            
+            git commit -m "Store screenshots for $CIRCLE_BRANCH"
+            git clean -df
+            git push origin HEAD:artifact_$CIRCLE_BRANCH -f
+
 jobs:
   # for getting the base branch name
   sleep:
@@ -193,6 +214,16 @@ jobs:
       - set_git_config
       - comment_screenshots_diff
       # TODO: export comparison result
+
+  export_artifact:
+    <<: *android
+    steps:
+      - checkout
+      # TODO: check mode
+      - gradle:
+          title: Record screenshots
+          task: recordRoborazziDebug
+      - push_artifact_as_branch
 
 workflows:
   ci:
