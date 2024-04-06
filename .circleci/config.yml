@@ -20,12 +20,15 @@ commands:
         type: string
       # write whatever you want
       options:
+        default: --no-daemon
+        type: string
+      vrt-options:
         type: string
     steps:
       - run:
           name: <<parameters.title>>
           command: |
-            ./gradlew <<parameters.task>> <<parameters.options>> --no-daemon
+            ./gradlew <<parameters.task>> <<parameters.options>> <<parameters.vrt-options>>
 
   check_is_pr:
     steps:
@@ -164,15 +167,19 @@ commands:
       - run:
           name: Create comment
           command: |
-            echo "Snapshot diff report" > comment
-            echo "| File name | Image |" >> comment
-            echo "|-------|-------|" >> comment
-            
             files=$(find . -type f -path "*/build/outputs/roborazzi/*" -name "*_compare.png")
-            for file in $files; do
-              fileName=$(basename "$file" | sed -r 's/(.{20})/\1<br>/g')
-              echo "| [$fileName](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file) | ![](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file?raw=true) |" >> comment
-            done
+            if [ -n "$files" ]; then
+              echo "### Snapshot diff report" > comment
+              echo "| File name | Image |" >> comment
+              echo "|-------|-------|" >> comment
+              for file in $files; do
+                fileName=$(basename "$file" | sed -r 's/(.{20})/\1<br>/g')
+                echo "| [$fileName](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file) | ![](https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/blob/comparison_$CIRCLE_BRANCH/$file?raw=true) |" >> comment
+              done
+            else
+              echo "### Snapshot diff report" > comment
+              echo "There is no screenshot change exist in this pull request !" >> comment
+            fi
       - run:
           name: Comment screenshots diff
           command: |
@@ -180,18 +187,18 @@ commands:
               prNumber=$(echo $CIRCLE_PULL_REQUEST | sed "s:.*/::")
               url="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/${prNumber}/comments"
               commentIds=$(echo -n $(curl -s -H "Authorization: token $GITHUB_BOT_ACCESS_TOKEN" $url -v | jq '.[] | select(.body | test("^Snapshot diff report.*")) | .id'))
+              failedComment="$(echo -e "### Snapshot diff report\n:warning: **Failed to show Snapshot diff**\n$CIRCLE_BUILD_URL")"
             
               if [ -n "$commentIds" ]; then
                 for commentId in $commentIds; do
                   comment="$(cat ./comment)"
                   endpoint="/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/comments/$commentId"
-                  gh api --method PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint -f body="$comment" ||
+                  gh api --method DELETE -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint ||
                   gh api --method PATCH -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" $endpoint -f body="$failedComment"
                 done
-              else
-                failedComment="$(echo -e "Snapshot diff report\n:warning: **Failed to show Snapshot diff**\n$CIRCLE_BUILD_URL")"
-                gh pr comment "$CIRCLE_PULL_REQUEST" -F ./comment || gh pr comment "$CIRCLE_PULL_REQUEST" -b "$failedComment"
               fi
+            
+              gh pr comment "$CIRCLE_PULL_REQUEST" -F ./comment || gh pr comment "$CIRCLE_PULL_REQUEST" -b "$failedComment"
             fi
 
   # TODO: Do not ignore commit history of existing artifact branch.
@@ -222,6 +229,25 @@ commands:
             git clean -df
             git push origin HEAD:artifact_$CIRCLE_BRANCH -f
 
+  cleanup_branches:
+    parameters:
+      prefix:
+        type: string
+      maximum_seconds_past:
+        type: integer
+        default: 1209600 # 14 days (industry standard agile sprint)
+    steps:
+      - run:
+          name: Cleanup branches
+          command: |
+            git branch -r --format="%(refname:lstrip=3)" | grep << parameters.prefix >> | while read -r branch; do
+              last_commit_date_timestamp=$(git log -1 --format=%ct "origin/$branch")
+              now_timestamp=$(date +%s)
+              if [ $((now_timestamp - last_commit_date_timestamp)) -gt << parameters.maximum_seconds_past >> ]; then
+                git push origin --delete "$branch"
+              fi
+            done || true
+
 jobs:
   # for getting the base branch name
   sleep:
@@ -245,10 +271,14 @@ jobs:
       - gradle:
           title: Unit test
           task: testDebugUnitTest
-          options: $EXTRA_UNIT_TEST_OPTIONS
+          vrt-options: $EXTRA_UNIT_TEST_OPTIONS
       - push_artifact_as_branch
       - push_comparison_branch
       - comment_screenshots_diff
+      - cleanup_branches:
+          prefix: artifact_
+      - cleanup_branches:
+          prefix: comparison_
 
 workflows:
   ci:
@@ -266,4 +296,3 @@ workflows:
                 - /feature\/.*/
                 - /fix\/.*/
                 - /bugfix\/.*/
-        # TODO: when comparison branch's base branch(parent of the pull request) is merged or closed, delete comparison branch
