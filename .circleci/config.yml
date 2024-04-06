@@ -94,7 +94,7 @@ commands:
             if [ $IS_ARTIFACT_EXIST = "true" ]; then
               mkdir -p ./temp/zip
               touch artifact.zip
-              find . -type f -path "*/build/outputs/roborazzi/*" zip -r ./temp/zip/artifact.zip {} +
+              find . -type f -path "*/build/outputs/roborazzi/*" -exec zip -r ./temp/zip/artifact.zip {} +
               echo "Zipped artifact: $(ls ./temp/zip)"
             fi
       - save_cache:
