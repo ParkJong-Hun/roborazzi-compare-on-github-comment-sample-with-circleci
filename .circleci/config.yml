@@ -139,7 +139,7 @@ commands:
             git checkout --orphan artifact_$CIRCLE_BRANCH
             git rm --cached -rf .
             
-            add_files=$(find . -type f -path "*/build/outputs/roborazzi/*")
+            add_files=$(find . -type f -path "*/build/outputs/roborazzi/*" ! -name "*.compare.png")
             for file in $add_files; do
               git add -f $file
             done
