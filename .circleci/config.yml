@@ -141,7 +141,13 @@ commands:
             
             add_files=$(find . -type f -path "*/build/outputs/roborazzi/*" ! -name "*_compare.png")
             for file in $add_files; do
-              git add -f $file
+              if [[ $file == *_actual.png ]]; then
+                main_file="${file%_actual.png}.png"
+                mv "$file" "$main_file"
+                git add -f "$main_file"
+              elif [[ $file == *.png ]]; then
+                git add -f "$file"
+              fi
             done
             
             echo $(date +%s) > timestamp
