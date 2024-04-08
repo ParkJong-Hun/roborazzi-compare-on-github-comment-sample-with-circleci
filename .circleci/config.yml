@@ -12,6 +12,20 @@ machines:
       tag: 2023.11.1
 
 commands:
+  set_artifact_mode:
+    parameters:
+      mode:
+        # modes: [ branch, circleci ]
+        default: branch
+        type: string
+    steps:
+      - run:
+          name: Set artifact mode
+          command: |
+            artifact_mode=<<parameters.mode>>
+            echo "Artifact Mode: $artifact_mode"
+            echo "export ARTIFACT_MODE=${artifact_mode}" >> $BASH_ENV
+
   gradle:
     parameters:
       title:
