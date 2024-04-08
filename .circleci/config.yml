@@ -242,9 +242,10 @@ commands:
             fi
 
   cleanup_branches:
-    maximum_seconds_past:
-      type: integer
-      default: 1209600 # 14 days (industry standard agile sprint)
+    parameters:
+      maximum_seconds_past:
+        type: integer
+        default: 1209600 # 14 days (industry standard agile sprint)
     steps:
       - run:
           name: Cleanup branches
