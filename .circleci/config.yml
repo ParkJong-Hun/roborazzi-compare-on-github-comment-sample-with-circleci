@@ -243,8 +243,6 @@ commands:
 
   cleanup_branches:
     parameters:
-      prefix:
-        type: string
       maximum_seconds_past:
         type: integer
         default: 1209600 # 14 days (industry standard agile sprint)
@@ -252,14 +250,17 @@ commands:
       - run:
           name: Cleanup branches
           command: |
-            git branch -r --format="%(refname:lstrip=3)" | grep << parameters.prefix >> | while read -r branch; do
-              last_commit_date_timestamp=$(git log -1 --format=%ct "origin/$branch")
-              now_timestamp=$(date +%s)
-              if [ $((now_timestamp - last_commit_date_timestamp)) -gt << parameters.maximum_seconds_past >> ]; then
-                git push origin --delete "$branch"
-                echo "Deleted branch: $branch"
-              fi
-            done || true
+            vrt_branches_prefix=("artifact_", "comparison_")
+            for prefix in $vrt_branches_prefix; do
+              git branch -r --format="%(refname:lstrip=3)" | grep $prefix | while read -r branch; do
+                last_commit_date_timestamp=$(git log -1 --format=%ct "origin/$branch")
+                now_timestamp=$(date +%s)
+                if [ $((now_timestamp - last_commit_date_timestamp)) -gt << parameters.maximum_seconds_past >> ]; then
+                  git push origin --delete "$branch"
+                  echo "Deleted branch: $branch"
+                fi
+              done || true
+            done
 
 jobs:
   # for getting the base branch name
@@ -288,10 +289,7 @@ jobs:
       - export_artifact_as_branch
       - export_comparison_as_branch
       - comment_screenshots_diff
-      - cleanup_branches:
-          prefix: artifact_
-      - cleanup_branches:
-          prefix: comparison_
+      - cleanup_branches
 
 workflows:
   ci:
